@@ -1,0 +1,3 @@
+# Generated or local secrets tfvars (Option B: pipeline writes these; never commit)
+*.secret.tfvars
+secrets.auto.tfvars
