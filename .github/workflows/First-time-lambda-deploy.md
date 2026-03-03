@@ -76,23 +76,37 @@ module "my_lambda" {
 
 ---
 
-# First-Time Deployment Flowchart
+# First-Time Deployment Flowchart (from dev to uat)
 
 ```text
                 ┌─────────────────────────────┐
                 │ Developer Adds New Lambda   │
-                │ Code Under lambda/functions │
+                │ Code Under lambda/functions │   # in the dev branch 
                 └──────────────┬──────────────┘
                                │
                                ▼
                 ┌─────────────────────────────┐
                 │ Update Environment main.tf  │
-                │ Add Lambda Module Reference │
+                │ Add Lambda Module Reference │   # for the dev environment under environment/dev
                 └──────────────┬──────────────┘
                                │
                                ▼
                 ┌─────────────────────────────┐
-                │ Create Pull Request         │
+                │ Deploy to dev AWS           |
+                |  to perform testing         |   # Once we have thoroughly tested our code in dev we will only then proceed to uat deployment
+                |  and validation             │ 
+                └──────────────┬──────────────┘
+                               │
+                               ▼  
+                ┌─────────────────────────────┐
+                │ Update the main.tf for      |
+                |  uat folder e.g under       |  # so that we can call the newly added lambda function in uat terraform
+                |  environments/uat           │ 
+                └──────────────┬──────────────┘
+                               │
+                               ▼   
+                ┌─────────────────────────────┐
+                │ Create Pull Request         │  # With target branch as uat and base as dev
                 └──────────────┬──────────────┘
                                │
                                ▼
@@ -104,19 +118,20 @@ module "my_lambda" {
                                │
                                ▼
                 ┌─────────────────────────────┐
-                │ Merge to Main               │
+                │ Merge to UAT branch         │
                 └──────────────┬──────────────┘
                                │
                                ▼
                 ┌─────────────────────────────┐
-                │ Deploy to DEV Account       │
-                │ cd environments/dev         │
+                │ Workflow will be triggerd   │
+                │ cd environments/uat         │
                 │ terraform apply             │
                 └──────────────┬──────────────┘
                                │
                                ▼
                 ┌─────────────────────────────┐
-                │ Promote to UAT              │
+                │ Update the prod environment |
+                |        terraform            │
                 └──────────────┬──────────────┘
                                │
                                ▼
