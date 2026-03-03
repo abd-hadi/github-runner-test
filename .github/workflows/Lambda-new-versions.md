@@ -106,9 +106,9 @@ For target environment (usually `dev`), the pipeline runs:
 - Alias will be updated  
 - No infrastructure destruction should occur  
 
-### Step 3 — Merge to Main (Deploy to Dev)
+### Step 3 — Merge to dev branch (Deploy to Dev)
 
-On merge to `main`, pipeline executes:
+On merge into the **dev branch**, the Terraform pipeline is run for the `dev` environment. Conceptually, it executes:
 
 ```bash
 cd environments/dev
@@ -122,9 +122,9 @@ terraform apply -var-file=dev.tfvars
 - Zero downtime  
 - Previous version still exists  
 
-### Step 4 — Promote to UAT
+### Step 4 — Promote to UAT (dev → uat)
 
-After validation in `dev`:
+After validation in `dev`, a PR is opened from the **dev branch to the uat branch**. When the PR is approved and merged, the Terraform pipeline is run for the `uat` environment. Conceptually, it applies:
 
 ```bash
 cd environments/uat
@@ -137,9 +137,9 @@ terraform apply -var-file=uat.tfvars
 - New version created in UAT  
 - Alias updated  
 
-### Step 5 — Deploy to Production
+### Step 5 — Deploy to Production (uat → prod)
 
-After UAT approval:
+After UAT approval, a PR is opened from the **uat branch to the prod branch**. When the PR is approved and merged, the Terraform pipeline is run for the `prod` environment. Conceptually, it applies:
 
 ```bash
 cd environments/prod
