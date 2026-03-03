@@ -17,6 +17,7 @@ The process ensures:
 
 - Each environment (dev, uat, prod) runs in a separate AWS account  
 - Each environment has its own Terraform state backend  
+- Each env has its own git branch e.g dev, uat, prod
 - Lambda functions are deployed using Terraform  
 - Lambda versions are immutable  
 - An alias per environment points to the active version  
@@ -66,95 +67,9 @@ resource "aws_lambda_alias" "current" {
 
 ---
 
-## 3. Code Update Workflow
 
-### Step 1 — Developer Updates Code
 
-Update files under:
-
-```text
-lambda/functions/<function-name>/
-```
-
-**Example**
-
-```text
-lambda/functions/my-function/app.py
-```
-
-Commit changes:
-
-```bash
-git commit -m "feat: improve validation logic"
-```
-
-Open a Pull Request.
-
-### Step 2 — Pull Request Pipeline
-
-For target environment (usually `dev`), the pipeline runs:
-
-- Terraform format check  
-- KICS security scan  
-- `terraform init`  
-- `terraform plan -var-file=dev.tfvars`  
-
-**Expected plan output**
-
-- Lambda function shows `~` update in-place  
-- New version will be created  
-- Alias will be updated  
-- No infrastructure destruction should occur  
-
-### Step 3 — Merge to dev branch (Deploy to Dev)
-
-On merge into the **dev branch**, the Terraform pipeline is run for the `dev` environment. Conceptually, it executes:
-
-```bash
-cd environments/dev
-terraform apply -var-file=dev.tfvars
-```
-
-**Result**
-
-- New Lambda version published  
-- Alias updated to new version  
-- Zero downtime  
-- Previous version still exists  
-
-### Step 4 — Promote to UAT (dev → uat)
-
-After validation in `dev`, a PR is opened from the **dev branch to the uat branch**. When the PR is approved and merged, the Terraform pipeline is run for the `uat` environment. Conceptually, it applies:
-
-```bash
-cd environments/uat
-terraform apply -var-file=uat.tfvars
-```
-
-**Effect**
-
-- Same code deployed to UAT account  
-- New version created in UAT  
-- Alias updated  
-
-### Step 5 — Deploy to Production (uat → prod)
-
-After UAT approval, a PR is opened from the **uat branch to the prod branch**. When the PR is approved and merged, the Terraform pipeline is run for the `prod` environment. Conceptually, it applies:
-
-```bash
-cd environments/prod
-terraform apply -var-file=prod.tfvars
-```
-
-**Effect**
-
-- New Lambda version published in prod account  
-- Alias updated  
-- Zero downtime  
-
----
-
-## 4. How Terraform Detects Code Changes
+## 3. How Terraform Detects Code Changes
 
 This line is critical:
 
@@ -175,7 +90,7 @@ source_code_hash = filebase64sha256(var.package_path)
 
 ---
 
-## 5. Rollback Strategy
+## 4. Rollback Strategy
 
 ### Option 1 — Alias Rollback (Fastest)
 
@@ -203,7 +118,7 @@ Merge the revert PR → pipeline redeploys the previous working version.
 
 ---
 
-## 6. Zero-Downtime Guarantee
+## 5. Zero-Downtime Guarantee
 
 Because:
 
@@ -215,7 +130,7 @@ There is no downtime during deployment.
 
 ---
 
-## 7. CI/CD Flow Summary
+## 6. CI/CD Flow Summary
 
 1. Pull Request  
 2. Terraform `fmt` check  
@@ -230,7 +145,7 @@ There is no downtime during deployment.
 
 ---
 
-## 8. What Does Not Change During Code Update
+## 7. What Does Not Change During Code Update
 
 The following resources are **not** recreated:
 
@@ -248,7 +163,7 @@ Only these change:
 
 ---
 
-## 9. First Deployment vs Update
+## 8. First Deployment vs Update
 
 | Scenario          | Behavior                        |
 | ----------------- | ------------------------------- |
@@ -259,7 +174,7 @@ Only these change:
 
 ---
 
-## 10. Best Practices
+## 9. Best Practices
 
 - Always use `publish = true`  
 - Always use `source_code_hash`  
@@ -271,7 +186,7 @@ Only these change:
 
 ---
 
-## 11. Deployment Summary
+## 10. Deployment Summary
 
 - Modify Lambda code  
 - Open PR  
@@ -282,5 +197,4 @@ Only these change:
 - Promote to prod  
 - Alias repoints automatically  
 - Zero downtime achieved  
-
 
