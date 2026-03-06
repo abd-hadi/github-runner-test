@@ -5,7 +5,8 @@ terraform {
     key    = "environments/dev/terraform.tfstate"
     region = "us-east-1"                 # adjust to your dev region
     encrypt = true
-  }
+  } 
 }
+
 
 
