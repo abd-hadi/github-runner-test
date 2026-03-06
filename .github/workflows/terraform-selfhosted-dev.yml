@@ -1,0 +1,30 @@
+name: Terraform Dev (Self-hosted)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  terraform-dev:
+    name: Terraform init/plan/apply (dev)
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+
+    defaults:
+      run:
+        working-directory: environments/dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Terraform init
+        run: terraform init
+
+      - name: Terraform plan
+        run: terraform plan --var-file=dev.tfvars
+
+      - name: Terraform apply
+        run: terraform apply --var-file=dev.tfvars -auto-approve
+
