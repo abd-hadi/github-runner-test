@@ -1,7 +1,6 @@
 name: Terraform Dev (Self-hosted)
 
 on:
-  workflow_dispatch: {}
   push:
     branches:
       - main
